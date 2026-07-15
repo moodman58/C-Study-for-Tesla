@@ -17,7 +17,8 @@ typedef enum {
     FAULT_MOTOR_OVERCURRENT,
     FAULT_SENSOR_DISCONNECT,
     FAULT_LOW_COOLANT,
-    FAULT_BRAKE_PRESSURE_LOW
+    FAULT_BRAKE_PRESSURE_LOW,
+    FAULT_BAD,
 } fault_code_t;
 
 typedef struct {
@@ -28,11 +29,18 @@ typedef struct {
 
 // Adds a new fault to the log. If full, overwrites the oldest entry.
 void log_fault(fault_log_t *log, fault_code_t code) {
+    log->head = log->count % LOG_CAPACITY;
+    log->buffer[log->head] = code;
+    log->count++;
     // TODO
 }
 
 // Prints all currently stored faults, oldest to newest
 void print_faults(const fault_log_t *log) {
+    // printf("%d\n", log->count);
+    for(int i=(log->count -1); i>(log->count - LOG_CAPACITY-1); --i){
+        printf("%d\n", log->buffer[i%LOG_CAPACITY]);
+    }
     // TODO
 }
 
@@ -47,6 +55,10 @@ int main(void) {
 
     // This 6th fault should overwrite the oldest one (FAULT_BATTERY_OVERTEMP)
     log_fault(&log, FAULT_SENSOR_DISCONNECT);
+    log_fault(&log, FAULT_BAD);
+    log_fault(&log, FAULT_BATTERY_OVERTEMP);
+    log_fault(&log, FAULT_SENSOR_DISCONNECT);
+    log_fault(&log, FAULT_LOW_COOLANT);
 
     print_faults(&log);
 
