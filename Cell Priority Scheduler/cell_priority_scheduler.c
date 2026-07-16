@@ -76,6 +76,9 @@ balance_node_t *dequeue_highest(balance_queue_t *q) {
     }
 
     balance_node_t *top = q->head;
+    if(q->head->next == NULL){
+        q->tail = NULL;
+    }
     q->head = q->head->next;
     q->size--;
 
@@ -94,8 +97,32 @@ void print_queue(const balance_queue_t *q) {
 
 int main(void) {
     balance_queue_t queue;
+    balance_node_t node;
     init_queue(&queue);
-
+    insert_sorted(&queue, 1, 5);
+    insert_sorted(&queue, 2, 4);
+    insert_sorted(&queue, 3, 6);
+    insert_sorted(&queue, 4, 6);
+    print_queue(&queue);
+    dequeue_highest(&queue);
+    dequeue_highest(&queue);
+    dequeue_highest(&queue);
+    dequeue_highest(&queue);
+    dequeue_highest(&queue);
+    insert_sorted(&queue, 1, 5);
+    insert_sorted(&queue, 2, 6);
+    insert_sorted(&queue, 3, 7);
+    print_queue(&queue);
+    dequeue_highest(&queue);
+    dequeue_highest(&queue);
+    dequeue_highest(&queue);
+    dequeue_highest(&queue);
+    dequeue_highest(&queue);
+    if(queue.tail != NULL){
+        printf("id: %d\n", queue.tail->cell_id);
+    }
+    insert_sorted(&queue, 1, 5);
+    print_queue(&queue);
     // TODO: write your own test cases here.
     // Try inserting several cells with different imbalances in various orders,
     // verify sorted order with print_queue after each insert.
