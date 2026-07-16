@@ -25,17 +25,40 @@ typedef struct {
 
 // Pushes a new maneuver onto the stack. Returns false if stack is full.
 bool push_maneuver(maneuver_stack_t *stack, maneuver_t m) {
+    if(stack->top < 20){
+        stack->history[stack->top] = m;
+        stack->top++;
+        return true;
+    }else{
+        return false;
+    }
+
     // TODO
 }
 
 // Pops the most recent maneuver off the stack. Returns false if empty.
 bool pop_maneuver(maneuver_stack_t *stack, maneuver_t *out) {
+    if(stack->top != 0){
+        stack->top--;
+        *out = stack->history[stack->top];
+        return true;
+    }
+    return false;
     // TODO
 }
 
 // Rolls back the last n maneuvers (pops and prints each one).
 // If the stack has fewer than n maneuvers, rolls back everything available.
 void rollback(maneuver_stack_t *stack, int n) {
+    maneuver_t maneuver;
+    for(int i=stack->top; i>=0; i--){
+        pop_maneuver(stack, &maneuver);
+        printf("%d\n", maneuver);
+        n--;
+        if(n == 0){
+            break;
+        }
+    }
     // TODO
 }
 
@@ -49,6 +72,9 @@ int main(void) {
 
     printf("Override triggered, rolling back last 2 maneuvers:\n");
     rollback(&stack, 2);
+    printf("Override triggered, rolling back last 2 maneuvers:\n");
+    rollback(&stack, 2);
+    printf("%d\n", stack.top);
 
     return 0;
 }
