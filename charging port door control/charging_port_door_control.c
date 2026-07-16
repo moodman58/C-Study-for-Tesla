@@ -10,7 +10,7 @@ Transitions are driven by discrete events (button press, cable inserted, cable r
 Not every event is valid in every state — invalid events for the current state should be ignored (log it, but don't change state).
 Valid transitions:
 
- * CLOSED   + BUTTON_PRESS         -> OPENING
+ * c   + BUTTON_PRESS         -> OPENING
  * OPENING  + DOOR_ACTUATED        -> OPEN
  * OPEN     + CABLE_INSERTED       -> CHARGING
  * OPEN     + BUTTON_PRESS         -> CLOSED
@@ -66,12 +66,74 @@ const char *event_name(port_event_t e) {
 // If the event is invalid for the current state, returns current_state unchanged.
 // Sets *transitioned to true/false accordingly.
 port_state_t get_next_state(port_state_t current_state, port_event_t event, bool *transitioned) {
+    switch(current_state){
+        case CLOSED:
+            if(event == BUTTON_PRESS){
+                *transitioned = true;
+                return OPENING;
+            }
+            break;
+        case OPENING:
+            if(event == DOOR_ACTUATED){
+                *transitioned = true;
+                return OPEN;
+            }
+            if(event == OBSTRUCTION_DETECTED){
+                *transitioned = true;
+                return CLOSED;
+            }
+            break;
+        case OPEN:
+            if(event == CABLE_INSERTED){
+                *transitioned = true;
+                return CHARGING;
+            }
+            if(event == BUTTON_PRESS){
+                *transitioned = true;
+                return CLOSED;
+            }
+            if(event == OBSTRUCTION_DETECTED){
+                *transitioned = true;
+                return CLOSED;
+            }
+            break;
+        case CHARGING:
+            if(event == CABLE_REMOVED || event == CHARGE_COMPLETE){
+                *transitioned = true;
+                return OPEN;
+            }
+            else if(event == OBSTRUCTION_DETECTED){
+                *transitioned = true;
+                return CLOSED;
+            }
+            else{
+                *transitioned = false;
+                return current_state;
+            }
+            break;
+    }
+    *transitioned = false;
+    return current_state;
     // TODO
 }
 
 // Processes every event in the queue, in order, updating state and
 // printing either a transition or an "ignored" message for each.
 void process_events(port_state_t *state, const event_queue_t *events) {
+    port_event_t current_event;
+    port_state_t current_state = *state;
+    bool transitioned;
+    for(int i=0; i<events->count; i++){
+        current_event = events->queue[i];
+        printf("event: %s\n", event_name(current_event));
+        current_state = get_next_state(current_state, current_event, &transitioned);
+        if(transitioned){
+            printf("transistioned state: %s\n", state_name(current_state));
+        }
+        else{
+            printf("ignored\n");
+        }
+    }
     // TODO
 }
 
